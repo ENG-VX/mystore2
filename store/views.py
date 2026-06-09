@@ -33,7 +33,9 @@ def product_detail(request,id):
 
 @api_view()
 def collection_detail(request, pk):
-    return Response("hi")
+    collection = Collection.objects.get(pk=pk)
+    serializer = CollectionSerializer(collection)
+    return Response(serializer.data)
 
 @api_view()
 def Order_list(request):
