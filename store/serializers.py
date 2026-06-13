@@ -11,7 +11,20 @@ class CollectionSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'title', 'unit_price', 'collection','price_with_tax']
+        fields = ['id', 'title', 'slug', 'inventory', 'description', 'unit_price', 'collection','price_with_tax']
+
+    # to valid in a different way
+    # def validate(self, data):
+    #     if data['pass'] != data['conf_pass']:
+    #         return serializers.ValidationError('password not match')
+    #     return data
+
+    # to add some modification on the data before saving it (and we have the same for update method)
+    # def save(self, **kwargs):
+    #     product = Product(**kwargs)
+    #     product.newField = 1
+    #     product.save()
+    #     return product
     
     # id = serializers.IntegerField()
     # title = serializers.CharField(max_length = 255)

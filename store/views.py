@@ -7,15 +7,22 @@ from .models import *
 from .serializers import *
 
 # Create your views here.
-@api_view()
+@api_view(['POST', 'GET'])
 def product_list(request):
-    queryset = Product.objects.select_related('collection').all()
-    serializer = ProductSerializer(queryset, many=True, context={'request': request})
-    return Response(serializer.data)
+    if request.method == 'GET':
+        queryset = Product.objects.select_related('collection').order_by('id')[:10]
+        serializer = ProductSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = ProductSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 # first way to get obj and handel it if it not found
 # @api_view()
-# def product_detail(request,id):
+# def product_detail(request,id):   
 #     try:
 #         product = Product.objects.get(id = id)
 #         serializer = ProductSerializer(product)
@@ -25,11 +32,17 @@ def product_list(request):
 
 
 # second and bitter way to get obj and handel it if it not found
-@api_view()
+@api_view(['GET','PUT'])
 def product_detail(request,id):
     product = get_object_or_404(Product, pk=id)
-    serializer = ProductSerializer(product)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = ProductSerializer(product, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view()
 def collection_detail(request, pk):
