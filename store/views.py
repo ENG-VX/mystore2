@@ -4,24 +4,61 @@ from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 from .models import *
 from .serializers import *
 
-# Create your views here.
-@api_view(['POST', 'GET'])
-def product_list(request):
-    if request.method == 'GET':
+# Create your views by class way (the best way), because you using OOP features
+class ProductList(APIView):
+    def get(self, request):
         queryset = Product.objects.select_related('collection').order_by('id')[:10]
         serializer = ProductSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-    elif request.method == 'POST':
+    
+    def post(self, request):
         serializer = ProductSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class ProductDetails(APIView):
+    def get(self, request, id):
+        product = get_object_or_404(Product, pk=id)
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
     
+    def put(self, request, id):
+        product = get_object_or_404(Product, pk=id)
+        serializer = ProductSerializer(product, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, id):
+        product = get_object_or_404(Product, pk=id)
+        if product.orderitems.count() > 0:
+            return Response({'errrrrror':"product can't be deleted because it linked with order item" },status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
+
+# Create your views by functional way (not best way)
+# @api_view(['POST', 'GET'])
+# def product_list(request):
+#     if request.method == 'GET':
+#         queryset = Product.objects.select_related('collection').order_by('id')[:10]
+#         serializer = ProductSerializer(queryset, many=True, context={'request': request})
+#         return Response(serializer.data)
+#     elif request.method == 'POST':
+#         serializer = ProductSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
 
 # first way to get obj and handel it if it not found
 # @api_view()
@@ -35,22 +72,22 @@ def product_list(request):
 
 
 # second and bitter way to get obj and handel it if it not found
-@api_view(['GET','PUT','DELETE'])
-def product_detail(request,id):
-    product = get_object_or_404(Product, pk=id)
-    if request.method == 'GET':
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
-    elif request.method == 'PUT':
-        serializer = ProductSerializer(product, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'DELETE':
-        if product.orderitems.count() > 0:
-            return Response({'errrrrror':"product can't be deleted because it linked with order item" },status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+# @api_view(['GET','PUT','DELETE'])
+# def product_detail(request,id):
+#     product = get_object_or_404(Product, pk=id)
+#     if request.method == 'GET':
+#         serializer = ProductSerializer(product)
+#         return Response(serializer.data)
+#     elif request.method == 'PUT':
+#         serializer = ProductSerializer(product, data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#     elif request.method == 'DELETE':
+#         if product.orderitems.count() > 0:
+#             return Response({'errrrrror':"product can't be deleted because it linked with order item" },status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#         product.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
