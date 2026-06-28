@@ -108,6 +108,10 @@ class OrderItemInline(admin.TabularInline):
     extra = 0
 
 
+@admin.register(models.OrderItem)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'order', 'product__id', 'quantity', 'unit_price']
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
     autocomplete_fields = ['customer']
