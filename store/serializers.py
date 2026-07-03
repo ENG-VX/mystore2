@@ -56,3 +56,11 @@ class OrderSerializer(serializers.ModelSerializer):
     customer = serializers.HyperlinkedRelatedField(
         queryset=Customer.objects.all(), view_name='customer-information'
     )
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'name', 'description', 'date']
+    def create(self, validated_data):
+        pID = self.context['product_id']
+        return Review.objects.create(product_id=pID, **validated_data)
