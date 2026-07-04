@@ -44,14 +44,14 @@ class ProductSerializer(serializers.ModelSerializer):
     
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
+        model = Customer
         fields = ['first_name', 'last_name']
     
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['date', 'payment_status', 'customer']
+        fields = ['placed_at', 'payment_status', 'customer']
     payment_status = serializers.CharField(max_length = 255)
     customer = serializers.HyperlinkedRelatedField(
         queryset=Customer.objects.all(), view_name='customer-information'

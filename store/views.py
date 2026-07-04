@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import *
 from .serializers import *
+from .filters import *
 
 # Create your views by class way (still not the best way), because you using OOP features
 # class ProductList(ListCreateAPIView):
@@ -75,6 +77,9 @@ from .serializers import *
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -108,19 +113,10 @@ class ReviewViewSet(ModelViewSet):
   
         
 
-
-
-@api_view()
-def Order_list(request):
+class OrderViewSet(ModelViewSet):
     queryset = Order.objects.all()
-    serializer = OrderSerializer(queryset, many=True, context={'request': request})
-    return Response(serializer.data)
+    serializer_class = OrderSerializer
 
-@api_view()
-def Order_detail(request, id):
-    order = Order.objects.get(pk=id)
-    serializer = OrderSerializer(order)
-    return Response(serializer.data)
 
 @api_view()
 def customer_detail(request, pk):
