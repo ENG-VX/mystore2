@@ -4,7 +4,8 @@ from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
     # from rest_framework.pagination import PageNumberPagination
 from .models import *
@@ -125,3 +126,8 @@ def customer_detail(request, pk):
     customer = Customer.objects.get(pk=pk)
     serializer = CustomerSerializer(customer)
     return Response(serializer.data)
+
+
+class CartViewSet(CreateModelMixin, GenericViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer

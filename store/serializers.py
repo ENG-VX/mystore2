@@ -64,3 +64,10 @@ class ReviewSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         pID = self.context['product_id']
         return Review.objects.create(product_id=pID, **validated_data)
+    
+
+class CartSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    class Meta:
+        model = Cart
+        fields = ['id']
