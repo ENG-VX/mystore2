@@ -4,7 +4,7 @@ from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
     # from rest_framework.pagination import PageNumberPagination
@@ -128,6 +128,6 @@ def customer_detail(request, pk):
     return Response(serializer.data)
 
 
-class CartViewSet(CreateModelMixin, GenericViewSet):
-    queryset = Cart.objects.all()
+class CartViewSet(CreateModelMixin, GenericViewSet, RetrieveModelMixin):
+    queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer
