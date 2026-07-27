@@ -43,9 +43,10 @@ class ProductSerializer(serializers.ModelSerializer):
         return product.unit_price * Decimal(1.1)
     
 class CustomerSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField()
     class Meta:
         model = Customer
-        fields = ['first_name', 'last_name']
+        fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']
     
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -125,4 +126,5 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, cart):
         return sum([item.quantity * item.product.unit_price for item in cart.items.all()])
+
 
