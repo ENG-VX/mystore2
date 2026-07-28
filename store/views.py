@@ -8,9 +8,11 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from .models import *
 from .serializers import *
 from .filters import *
+from .permissions import *
 
 # Create your views by class way (still not the best way), because you using OOP features
 # class ProductList(ListCreateAPIView):
@@ -82,7 +84,7 @@ class ProductViewSet(ModelViewSet):
     # pagination_class = PageNumberPagination
     search_fields = ['title', 'description']
     ordering_fields = ['unit_price','last_update']
-
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -100,6 +102,7 @@ class ProductViewSet(ModelViewSet):
 class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.annotate(number_of_products=Count('product')).all()
     serializer_class = CollectionSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def destroy(self, request, *args, **kwargs):
         if Product.objects.filter(collection_id = kwargs['pk']).exists():
@@ -149,11 +152,12 @@ class CartItemViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'cart_id':self.kwargs['cart_pk']}
 
-class CustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    permission_classes = [IsAdminUser]
 
-    @action(detail=False, methods=['GET', 'PUT'])
+    @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
         (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
         if request.method == 'GET':
