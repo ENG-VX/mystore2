@@ -111,7 +111,7 @@ class OrderItemInline(admin.TabularInline):
 
 
 @admin.register(models.OrderItem)
-class OrderAdmin(admin.ModelAdmin):
+class OrderItemAdmin(admin.ModelAdmin):
     list_display = ['id', 'order', 'product__id', 'quantity', 'unit_price']
 
 @admin.register(models.Order)

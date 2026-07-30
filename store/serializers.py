@@ -49,14 +49,14 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']
     
 
-class OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ['placed_at', 'payment_status', 'customer']
-    payment_status = serializers.CharField(max_length = 255)
-    customer = serializers.HyperlinkedRelatedField(
-        queryset=Customer.objects.all(), view_name='customer-information'
-    )
+# class OrderSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Order
+#         fields = ['placed_at', 'payment_status', 'customer']
+#     payment_status = serializers.CharField(max_length = 255)
+#     customer = serializers.HyperlinkedRelatedField(
+#         queryset=Customer.objects.all(), view_name='customer-information'
+#     )
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,7 +66,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         pID = self.context['product_id']
         return Review.objects.create(product_id=pID, **validated_data)
 
-class CartProductSerializer(serializers.ModelSerializer):
+class SimpleProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'title', 'unit_price']
@@ -77,7 +77,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = ['id', 'product', 'quantity', 'total_price']
 
-    product = CartProductSerializer()
+    product = SimpleProductSerializer()
 
     total_price = serializers.SerializerMethodField("calc_total_price")
     def calc_total_price(self, CI:CartItem):
@@ -117,14 +117,27 @@ class UpdateCartItemSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     total_price = serializers.SerializerMethodField()
+    items = CartItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Cart
         fields = ['id', 'items', 'total_price']
 
-    items = CartItemSerializer(many=True, read_only=True)
-
     def get_total_price(self, cart):
         return sum([item.quantity * item.product.unit_price for item in cart.items.all()])
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer()
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'unit_price', 'quantity']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
+
 
 
