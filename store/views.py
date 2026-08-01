@@ -168,7 +168,6 @@ class CustomerViewSet(ModelViewSet):
         return Response('ok')
 
 class OrderViewSet(ModelViewSet):
-    serializer_class = OrderSerializer
     queryset = Order.objects.all()
     permission_classes = [IsAuthenticated]
 
@@ -176,5 +175,12 @@ class OrderViewSet(ModelViewSet):
         user = self.request.user
         if user.is_staff:
             return Order.objects.all()
-
         return Order.objects.filter(customer__user_id=user.id)
+
+    def get_serializer_context(self):
+        return {'user_id':self.request.user.id}
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateOrderSerializer
+        return OrderSerializer
